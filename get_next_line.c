@@ -3,7 +3,7 @@
 static char	*init(t_lst *b, char *rem)
 {
 	ft_bzero(b, sizeof(t_lst));
-	if (rem)
+	if (rem && *rem)
 		return (rem);
 	return (ft_strdup(""));
 }
@@ -23,15 +23,14 @@ static void	readline(t_lst *b, int fd)
 {
 	while (!check_nl(b->line))
 	{
-		if (read(fd, b->buffer, BUFFER_SIZE) < 1)
-		{
-			ft_bzero(b->buffer, BUFFER_SIZE+1);
+		int s;
+
+		s = read(fd, b->buffer, BUFFER_SIZE);
+		if (s > 0)
+			b->line = ft_strjoin(b->line, b->buffer);
+		else
 			break ;
-		}
-		b->line = ft_strjoin(b->line, b->buffer);
 		ft_bzero(b->buffer, BUFFER_SIZE+1);
-		if (!b->line)
-			break ;
 	}
 }
 
@@ -54,8 +53,11 @@ char	*get_next_line(int fd)
 	static char	*rem;
 
 	box.line = init(&box, rem);
-	ft_bzero(rem, ft_strlen(rem));
-	free(rem);
+	if (rem && !*rem)
+	{
+		free(rem);
+	}
+	rem = NULL;
 	readline(&box, fd);
 	if (*(box.line) <= 0)
 		return (free(box.line), NULL);
@@ -64,20 +66,22 @@ char	*get_next_line(int fd)
 	return (box.line);
 }
 
-int	main(void)
-{
-	int		fd;
-	char	*line;
+// int	main(void)
+// {
+// 	int		fd;
+// 	char	*line;
 
-	fd = open("text.txt", O_RDONLY, 0100);
-	line = get_next_line(fd);
-	while (line)
-	{
-		printf("%s", line);
-		line = get_next_line(fd);
-	}
-	printf("%s", line);
-	line = get_next_line(fd);
-	printf("%s", line);
-	return (0);
-}
+// 	fd = open("text.txt", O_RDONLY, 0100);
+// 	line = get_next_line(fd);
+// 	printf("%s", line);
+// 	line = get_next_line(fd);
+// 	while (line)
+// 	{
+// 		printf("%s", line);
+// 		line = get_next_line(fd);
+// 	}
+// 	printf("%s", line);
+// 	line = get_next_line(fd);
+// 	printf("%s", line);
+// 	return (0);
+// }
