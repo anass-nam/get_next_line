@@ -1,82 +1,69 @@
 #include "get_next_line.h"
 
-void	ft_bzero(void *s, size_t n)
-{
-	while (n--)
-		*(char *)(s + n) = '\0';
-}
-
-void	*ft_calloc(size_t count, size_t size)
-{
-	void	*ptr;
-	size_t	t;
-
-	t = count * size;
-	if (!count || !size)
-		t = 1;
-	else if (t / count != size)
-		return (NULL);
-	ptr = malloc(t);
-	if (ptr)
-		ft_bzero(ptr, t);
-	return (ptr);
-}
-
-size_t	ft_strlen(const char *s)
+size_t	ft_strdlen(const char *s, char c)
 {
 	size_t	i;
 
-	if (s)
-	{
-		i = 0;
-		while (s[i])
-			i++;
-		return (i);
-	}
-	return (0);
-}
-
-char	*ft_strjoin(char *s1, char const *s2)
-{
-	char	*ptr;
-	size_t		i;
-	size_t		j;
-
-	if (!s1 || !s2)
-		return (NULL);
-	ptr = (char *)ft_calloc(ft_strlen(s1) + ft_strlen(s2) + 1, sizeof(char));
-	if (!ptr)
-		return (NULL);
 	i = 0;
-	while (s1[i])
-	{
-		ptr[i] = s1[i];
+	while (*(s + i) && *(s + i) != c)
 		i++;
-	}
-	j = 0;
-	while (s2[j])
-	{
-		ptr[i] = s2[j];
-		i++;
-		j++;
-	}
-	free(s1);
-	return (ptr);
+	return (i);
 }
 
 char	*ft_strdup(const char *s1)
 {
-	char *ptr;
-	size_t i;
+	char	*cpy;
+	size_t	len;
 
-	ptr = (char *)ft_calloc(ft_strlen(s1) + 1, sizeof(char));
-	if (!ptr)
-		return (NULL);
+	len = ft_strdlen(s1, '\0');
+	cpy = (char *)malloc((len + 1) * sizeof(char));
+	if (cpy)
+		cpy = ft_strncpy(cpy, s1, len);
+	return (cpy);
+}
+
+char	*ft_strncpy(char *dst, const char *src, size_t n)
+{
+	size_t	i;
+
 	i = 0;
-	while (s1[i])
+	while (i < n)
 	{
-		ptr[i] = s1[i];
+		*(dst + i) = *(src + i);
 		i++;
 	}
-	return (ptr);
+	*(dst + i) = '\0';
+	return (dst);
+}
+
+char	*ft_strjoin(char *s1, char *s2)
+{
+	char	*str;
+	size_t	s1_len;
+	size_t	s2_len;
+
+	if (!s1 || !s2)
+		return (free(s1), NULL);
+	s1_len = ft_strdlen(s1, '\0');
+	s2_len = ft_strdlen(s2, '\0');
+	str = (char *)malloc(sizeof(char) * (s1_len + s2_len + 1));
+	if (!str)
+		return (NULL);
+	ft_strncpy(str, s1, s1_len);
+	ft_strncpy(str + s1_len, s2, s2_len);
+	free(s1);
+	s1 = NULL;
+	return (str);
+}
+
+char	*ft_substr(char *s, size_t start, size_t len)
+{
+	char	*str;
+	
+	if (!s || start >= ft_strdlen(s, '\0'))
+		return (NULL);
+	str = (char *)malloc(sizeof(char) * (len + 1));
+	if (str)
+		str = ft_strncpy(str, s + start, len);
+	return (str);
 }

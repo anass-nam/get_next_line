@@ -1,87 +1,85 @@
 #include "get_next_line.h"
 
-static char	*init(t_lst *b, char *rem)
+static void	reset_buf(char *b)
 {
-	ft_bzero(b, sizeof(t_lst));
-	if (rem && *rem)
-		return (rem);
-	return (ft_strdup(""));
+	ssize_t	i;
+
+	i = -1;
+	while (++i <= BUFFER_SIZE)
+		*(b + i) = '\0';
+}
+
+static char	*init(char *rem)
+{
+	char	*l;
+
+	if (rem)
+	{
+		l = ft_strdup(rem);
+		free(rem);
+		rem = NULL;
+	}
+	else
+		l = ft_strdup("");
+	return (l);
 }
 
 static int	check_nl(char *s)
 {
-	size_t	i;
-
-	i = 0;
-	while (*(s + i))
-		if (*(s + i++) == '\n')
-			return (1);
+	if (s)
+	{
+		while (*s)
+			if (*(s++) == '\n')
+				return (0);
+		return (1);
+	}
 	return (0);
 }
 
-static void	readline(t_lst *b, int fd)
+static char	*readline(char *b, char *l, int fd)
 {
-	while (!check_nl(b->line))
+	char	*line;
+	ssize_t	rd_status;
+	size_t	nl_check;
+
+	line = l;
+	nl_check = 1;
+	while (nl_check)
 	{
-		int s;
-
-		s = read(fd, b->buffer, BUFFER_SIZE);
-		if (s > 0)
-			b->line = ft_strjoin(b->line, b->buffer);
-		else
+		reset_buf(b);
+		rd_status = read(fd, b, BUFFER_SIZE);
+		if (!rd_status)
 			break ;
-		ft_bzero(b->buffer, BUFFER_SIZE+1);
+		else if (rd_status == -1)
+			return (free(line), NULL);
+		line = ft_strjoin(line, b);
+		nl_check = check_nl(line);
 	}
-}
-
-static char	*shrink(t_lst *b)
-{
-	char	*rem;
-	size_t		i;
-
-	i = 0;
-	while (*(b->line + i) && *(b->line + i) != '\n')
-		i++;
-	rem = ft_strdup((b->line + i + 1));
-	ft_bzero(b->line + i + 1, ft_strlen(b->line + i + 1));
-	return (rem);
+	return (line);
 }
 
 char	*get_next_line(int fd)
 {
-	t_lst		box;
-	static char	*rem;
+	static char	*buf;
+	char		*line;
+	char		*ret;
+	int			len;
 
-	box.line = init(&box, rem);
-	if (rem && !*rem)
+	ret = NULL;
+	line = init(buf);
+	buf = (char *)malloc((BUFFER_SIZE + 1) * sizeof(char));
+	line = readline(buf, line, fd);
+	free(buf);
+	buf = NULL;
+	if (line)
 	{
-		free(rem);
+		len = ft_strdlen(line, '\n') + 1;
+		if (*line)
+		{
+			ret = ft_substr(line, 0, len);
+			buf = ft_substr(line, len, ft_strdlen(line, '\0') - len);
+		}
+		free(line);
 	}
-	rem = NULL;
-	readline(&box, fd);
-	if (*(box.line) <= 0)
-		return (free(box.line), NULL);
-	else if (box.line)
-		rem = shrink(&box);
-	return (box.line);
+	return (ret);
 }
-
-// int	main(void)
-// {
-// 	int		fd;
-// 	char	*line;
-
-// 	fd = open("text.txt", O_RDONLY, 0100);
-// 	line = get_next_line(fd);
-// 	printf("%s", line);
-// 	line = get_next_line(fd);
-// 	while (line)
-// 	{
-// 		printf("%s", line);
-// 		line = get_next_line(fd);
-// 	}
-// 	printf("%s", line);
-// 	line = get_next_line(fd);
-// 	printf("%s", line);
-// 	return (0);
-// }
