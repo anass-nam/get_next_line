@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   get_next_line_utils.c                              :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: anammal <marvin@42.fr>                     +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2022/12/09 11:58:11 by anammal           #+#    #+#             */
+/*   Updated: 2022/12/09 11:58:12 by anammal          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "get_next_line.h"
 
 size_t	ft_strdlen(const char *s, char c)
@@ -59,7 +71,7 @@ char	*ft_strjoin(char *s1, char *s2)
 char	*ft_substr(char *s, size_t start, size_t len)
 {
 	char	*str;
-	
+
 	if (!s || start >= ft_strdlen(s, '\0'))
 		return (NULL);
 	str = (char *)malloc(sizeof(char) * (len + 1));
